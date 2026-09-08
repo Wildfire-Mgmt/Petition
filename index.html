@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<title>Petition Web App</title>
+		<style>
+			:root {
+				--primary-color: #2563eb;
+				--primary-hover: #1d4ed8;
+				--bg-color: #f8fafc;
+				--card-bg: #ffffff;
+				--text-color: #1e293b;
+				--border-color: #cbd5e1;
+			}
+		
+			body {
+				font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+				background-color: var(--bg-color);
+				color: var(--text-color);
+				margin: 0;
+				padding: 20px;
+				display: flex;
+				justify-content: center;
+				align-items: center;
+			}
+		
+			.petition-container {
+				background: var(--card-bg);
+				padding: 30px;
+				border-radius: 12px;
+				box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+				width: 100%;
+				max-width: 700px; <!--body width 450px;-->
+				box-sizing: border-box;
+			}
+		
+			.counter-box {
+				text-align: center;
+				background: #eff6ff;
+				border: 1px solid #bfdbfe;
+				padding: 15px;
+				border-radius: 8px;
+				margin-bottom: 25px;
+			}
+		
+			.counter-number {
+				font-size: 2rem;
+				font-weight: bold;
+				color: var(--primary-color);
+				margin: 0;
+			}
+		
+			.counter-label {
+				font-size: 0.875rem;
+				color: #64748b;
+				text-transform: uppercase;
+				letter-spacing: 0.05em;
+				margin-top: 5px;
+			}
+		
+			.form-group {
+				margin-bottom: 18px;
+			}
+		
+			label {
+				display: block;
+				font-weight: 600;
+				margin-bottom: 6px;
+				font-size: 0.9rem;
+			}
+		
+			input[type="text"],
+			input[type="email"] {
+				width: 100%;
+				padding: 10px;
+				border: 1px solid var(--border-color);
+				border-radius: 6px;
+				font-size: 1rem;
+				box-sizing: border-box;
+				transition: border-color 0.2s;
+			}
+		
+			input:focus {
+				outline: none;
+			border-color: var(--primary-color);
+			}
+		
+			.signature-wrapper {
+				position: relative;
+				border: 1px dashed var(--border-color);
+				border-radius: 6px;
+				background: #fafafa;
+				margin-bottom: 8px;
+			}
+		
+			canvas {
+				display: block;
+				width: 100%;
+				height: 150px;
+				cursor: crosshair;
+				touch-action: none; /* Prevents screen scrolling while signing on mobile */
+			}
+		
+			.clear-btn {
+				background: none;
+				border: none;
+				color: #ef4444;
+				font-size: 0.85rem;
+				cursor: pointer;
+				padding: 0;
+				text-decoration: underline;
+				display: block;
+				margin-left: auto;
+			}
+		
+			.submit-btn {
+				width: 100%;
+				background: var(--primary-color);
+				color: white;
+				border: none;
+				padding: 12px;
+				font-size: 1rem;
+				font-weight: 600;
+				border-radius: 6px;
+				cursor: pointer;
+				margin-top: 15px;
+				transition: background 0.2s;
+			}
+		
+			.submit-btn:hover {
+				background: var(--primary-hover);
+			}
+		
+			.submit-btn:disabled {
+				background: #94a3b8;
+				cursor: not-allowed;
+			}
+		
+			#status-msg {
+				text-align: center;
+				margin-top: 15px;
+				font-size: 0.95rem;
+				font-weight: 500;
+			}
+			
+			.petition-content { 
+				background: #ffffff; 
+				border: 1px 
+				solid #e0e0e0; 
+				padding: 25px; 
+				border-radius: 6px; 
+				margin-bottom: 30px; 
+				box-shadow: 0 2px 4px rgba(0,0,0,0.05); 
+			}
+			
+			.petition-content h1 { margin-top: 0; color: #111; font-size: 1.8rem; }
+			.petition-content h3 { color: #555; border-bottom: 2px solid #eaeaea; padding-bottom: 8px; margin-top: 20px; }
+			.petition-content ul { padding-left: 20px; }
+			.petition-content li { margin-bottom: 8px; }
+			.counter-box { background: #f8f9fa; border: 1px solid #ddd; padding: 20px; text-align: center; border-radius: 5px; margin-bottom: 35px; }
+			.counter-num { font-size: 2.2rem; font-weight: bold; color: #007bff; display: block; margin-bottom: 5px; }
+			.target-text { font-size: 0.9rem; color: #666; margin-bottom: 12px; font-weight: bold; }
+			.progress-container { background-color: #e9ecef; border-radius: 10px; width: 100%; height: 20px; position: relative; overflow: hidden; box-shadow: inset 0 1px 3px rgba(0,0,0,0.2); }
+			.progress-bar { background-color: #28a745; height: 100%; width: 0%; border-radius: 10px; transition: width 1s ease-in-out; }
+		</style>
+	</head>
+	<body>
+	
+		<div class="petition-container">
+			<div class="petition-content">
+				<h1>Petition: Protect Public Lands Bison and Restore Free-Roaming Wildlife Corridors</h1>
+				<p><strong>To:</strong> Minister of Environment and Climate Change Strategy, Minister of Water, Land and Resource Stewardship, Members of the Legislative Assembly (MLAs) of British Columbia</p>
+				<p>We, the undersigned citizens and conservation advocates, are writing to demand immediate, permanent federal protection for remaining wild <strong>bison populations</strong>. Wild bison (Bos bison) are a critical keystone species, serving as vital ecological engineers that shape landscapes, mitigate wildfire risks, and foster plant and animal biodiversity. In British Columbia, small, distinct wild populations—such as the Pink Mountain plains bison herd and the Nordquist and Nahanni wood bison herds—represent irreplaceable genetic lineages and a profound natural heritage.</p>
+				<p>We cannot afford to lose these iconic animals from our wilderness. Real conservation requires proactive, science-based, and legally binding protections.</p>
+				<h3>Our Core Demands:</h3>
+				<ul>
+					<li><strong>Establish Dedicated Wildlife Corridors and Protected Habitats:</strong> Formally expand and interconnect protected zones—such as the Liard River Corridor and adjacent ranges—to secure critical foraging and migration grounds free from industrial disruption.</li>
+					<li><strong>Implement Science-Based Conservation Management Plans:</strong> Transition management goals toward reinforcing genetic diversity and population health, rather than limiting herds primarily to avoid socio-economic conflicts.</li>
+					<li><strong>Partner with Indigenous Communities:</strong> Ensure that all wild bison recovery initiatives respect and incorporate Indigenous knowledge, stewardship, and treaty rights, recognizing bison as a culturally significant resource.</li>
+					<p>Sign this petition to demand that British Columbia gives its wild bison a secure future. Let our leaders know that we value ecological integrity, biodiversity, and the preservation of our iconic Canadian wildlife.</p>
+				</ul>
+			</div>
+			<h2>Sign the Petition</h2>
+			<div class="counter-box">
+				<p class="counter-number" id="sig-counter">...</p>
+				<p class="counter-label">Signatures Collected</p>
+			</div>
+		
+			<form id="petition-form">
+				<div class="form-group">
+					<label for="name">Full Name</label>
+					<input type="text" id="name" required placeholder="John Doe">
+				</div>
+			
+				<div class="form-group">
+					<label for="email">Email Address</label>
+					<input type="email" id="email" required placeholder="john@example.com">
+				</div>
+			
+				<div class="form-group">
+					<label for="zip">Zip / Postal Code</label>
+					<input type="text" id="zip" required placeholder="123 456">
+				</div>
+			
+				<div class="form-group">
+					<label>Draw Your Signature</label>
+					<div class="signature-wrapper">
+					<canvas id="signature-pad"></canvas>
+					</div>
+					<button type="button" class="clear-btn" id="clear-pad">Clear Signature</button>
+				</div>
+			
+				<button type="submit" class="submit-btn" id="submit-btn">Submit My Signature</button>
+				<div id="status-msg"></div>
+			</form>
+		</div>
+		
+		<script>
+			// paste your deployed Google Web App URL here
+			const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwL3Q8OWHFf1QzHw3QN9yaILVK4Q2pjbWQT71xy0Vp4CKykwIPuoPvsyT_lnl_dzuFT/exec'; 
+		
+			const canvas = document.getElementById('signature-pad');
+			const ctx = canvas.getContext('2d');
+			const form = document.getElementById('petition-form');
+			const clearBtn = document.getElementById('clear-pad');
+			const submitBtn = document.getElementById('submit-btn');
+			const counterDisplay = document.getElementById('sig-counter');
+			const statusMsg = document.getElementById('status-msg');
+		
+			let isDrawing = false;
+			let hasSigned = false;
+		
+			// Adjust canvas layout sharpness for retina/high-res displays
+			function resizeCanvas() {
+				const rect = canvas.getBoundingClientRect();
+				canvas.width = rect.width;
+				canvas.height = rect.height;
+				ctx.lineWidth = 2;
+				ctx.lineCap = 'round';
+				ctx.strokeStyle = '#000000';
+			}
+			
+			window.addEventListener('resize', resizeCanvas);
+			resizeCanvas();
+		
+			// Fetch initial signature count from Google Sheet
+			async function fetchCounter() {
+			try {
+				const response = await fetch(SCRIPT_URL);
+				const data = await response.json();
+				counterDisplay.textContent = Number(data.count).toLocaleString();
+			} catch (err) {
+				counterDisplay.textContent = '0';
+				console.error('Error fetching counter:', err);
+			}
+			}
+			fetchCounter();
+		
+			// Signature Drawing Logic (Handles both Desktop Mouse & Touchscreens)
+			function getMousePos(e) {
+				const rect = canvas.getBoundingClientRect();
+				const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+				const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+				return {
+					x: clientX - rect.left,
+					y: clientY - rect.top
+				};
+			}
+		
+			function startDrawing(e) {
+				isDrawing = true;
+				const pos = getMousePos(e);
+				ctx.beginPath();
+				ctx.moveTo(pos.x, pos.y);
+			}
+		
+			function draw(e) {
+				if (!isDrawing) return;
+				const pos = getMousePos(e);
+				ctx.lineTo(pos.x, pos.y);
+				ctx.stroke();
+				hasSigned = true;
+			}
+		
+			function stopDrawing() {
+				isDrawing = false;
+			}
+		
+			canvas.addEventListener('mousedown', startDrawing);
+			canvas.addEventListener('mousemove', draw);
+			window.addEventListener('mouseup', stopDrawing);
+		
+			canvas.addEventListener('touchstart', startDrawing);
+			canvas.addEventListener('touchmove', draw);
+			window.addEventListener('touchend', stopDrawing);
+		
+			clearBtn.addEventListener('click', () => {
+			ctx.clearRect(0, 0, canvas.width, canvas.height);
+			hasSigned = false;
+			});
+		
+			// Form submission processing
+			form.addEventListener('submit', async (e) => {
+			e.preventDefault();
+		
+			if (!hasSigned) {
+				statusMsg.style.color = '#ef4444';
+				statusMsg.textContent = 'Please provide a signature before submitting.';
+				return;
+			}
+		
+			submitBtn.disabled = true;
+			submitBtn.textContent = 'Submitting...';
+			statusMsg.style.color = '#64748b';
+			statusMsg.textContent = 'Sending signature securely...';
+		
+			// Convert drawing into a image string
+			const signatureDataUrl = canvas.toDataURL();
+		
+			const payload = {
+				name: document.getElementById('name').value,
+				email: document.getElementById('email').value,
+				zip: document.getElementById('zip').value,
+				signature: signatureDataUrl
+			};
+		
+			try {
+				const response = await fetch(SCRIPT_URL, {
+				method: 'POST',
+				mode: 'cors',
+				headers: {
+					'Content-Type': 'text/plain' // Intentionally text/plain to bypass complex CORS blocks
+				},
+				body: JSON.stringify(payload)
+				});
+		
+				const result = await response.json();
+		
+				if (result.status === 'success') {
+				statusMsg.style.color = '#22c55e';
+				statusMsg.textContent = 'Thank you! Your signature has been recorded.';
+				counterDisplay.textContent = Number(result.count).toLocaleString();
+				form.reset();
+				ctx.clearRect(0, 0, canvas.width, canvas.height);
+				hasSigned = false;
+				} else {
+				throw new Error(result.message);
+				}
+			} catch (err) {
+				statusMsg.style.color = '#ef4444';
+				statusMsg.textContent = 'Submission error. Please try again.';
+				console.error(err);
+			} finally {
+				submitBtn.disabled = false;
+				submitBtn.textContent = 'Sign the Petition';
+			}
+			});
+		</script>
+	</body>
+</html>
